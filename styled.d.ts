@@ -1,0 +1,17 @@
+import "styled-components";
+
+// and extend them!
+declare module "styled-components" {
+  export interface DefaultTheme {
+    colors: {
+      black: string;
+      white: string;
+      blue: string;
+      lightgray: string;
+      darkgray: string;
+    };
+    bgColors: {
+      blue: string;
+    };
+  }
+}
