@@ -12,6 +12,8 @@ declare module "styled-components" {
     };
     bgColors: {
       blue: string;
+      active: string;
+      unactive: string;
     };
   }
 }

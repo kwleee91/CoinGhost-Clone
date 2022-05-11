@@ -1,11 +1,32 @@
 import styled from "styled-components";
 import Term from "../components/Term";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
-function Home({ data }) {
-  const handleSubmit = (event) => {
+interface Props {
+  data?: {
+    id: number;
+    text: string;
+    select: string;
+    content: string;
+  } | null;
+}
+
+function Home() {
+  const [data, setData] = useState<Props[]>();
+
+  useEffect(() => {
+    (async () => {
+      const response = await fetch("http://localhost:3000/data/sample.json");
+      const json = await response.json();
+      setData(json);
+    })();
+  }, []);
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
   };
+
   return (
     <Container>
       <Form onSubmit={handleSubmit}>
@@ -16,7 +37,7 @@ function Home({ data }) {
             수신(선택)에 모두 동의합니다.
           </TermsText>
         </TermsConfirmAll>
-        {data.map((item) => {
+        {data?.map((item) => {
           return <Term key={item.id} item={item} />;
         })}
         <BtnWrapper>
@@ -25,21 +46,15 @@ function Home({ data }) {
               <Btn>취소</Btn>
             </a>
           </Link>
-          <NextBtn>다음</NextBtn>
+          <Link href="/info">
+            <a>
+              <NextBtn>다음</NextBtn>
+            </a>
+          </Link>
         </BtnWrapper>
       </Form>
     </Container>
   );
-}
-
-export async function getStaticProps() {
-  const res = await fetch("http://localhost:3000/data/sample.json");
-  const data = await res.json();
-  return {
-    props: {
-      data,
-    },
-  };
 }
 
 const Container = styled.div``;

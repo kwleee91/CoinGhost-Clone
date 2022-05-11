@@ -10,6 +10,8 @@ const colors = {
 //
 const bgColors = {
   blue: "#5382eb",
+  active: "#6f94e9",
+  unactive: "#c3d4fc",
 };
 //
 const theme: DefaultTheme = {

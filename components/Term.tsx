@@ -6,7 +6,6 @@ interface Props {
 }
 
 export default function Term(props: Props) {
-  console.log(props);
   return (
     <TermsDetail>
       <TermsDetailWrapper>
