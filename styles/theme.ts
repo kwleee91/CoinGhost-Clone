@@ -8,15 +8,14 @@ const colors = {
   darkgray: "#a9a9a9",
 };
 //
-const bgColors = {
-  blue: "#5382eb",
+const btnColors = {
   active: "#6f94e9",
   unactive: "#c3d4fc",
 };
 //
 const theme: DefaultTheme = {
   colors,
-  bgColors,
+  btnColors,
 };
 //
 export default theme;

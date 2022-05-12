@@ -10,8 +10,7 @@ declare module "styled-components" {
       lightgray: string;
       darkgray: string;
     };
-    bgColors: {
-      blue: string;
+    btnColors: {
       active: string;
       unactive: string;
     };
