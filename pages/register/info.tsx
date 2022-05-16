@@ -1,25 +1,60 @@
 import styled from "styled-components";
 import { useForm } from "react-hook-form";
-import { ErrorMessage } from "@hookform/error-message";
+import { useState } from "react";
 
 interface FormInputs {
-  phoneNumberErrorInput: number;
-  confirmNumberErrorInput: number;
-  pwErrorInput: number;
-  pwConfirmErrorInput: number;
-  nickNameErrorInput: string;
+  countryCode: string;
+  phoneNumber: string;
+  verifyCode: number;
+  pwInput: number;
+  pwConfirm: number;
+  nickName: string;
 }
 
 function Info() {
+  const [verifyCode, setVerifyCode] = useState([]);
+  console.log(verifyCode);
   const {
     register,
-    formState: { errors },
+    watch,
     handleSubmit,
+    formState: { errors },
   } = useForm<FormInputs>({
     criteriaMode: "all",
   });
 
-  const onSubmit = (data: FormInputs) => console.log(data);
+  const onSubmit = (data: FormInputs) => console.log("");
+
+  const regPhone = /^01([0|1|6|7|8|9])-?([0-9]{3,4})-?([0-9]{4})$/;
+
+  const checkPhoneNum = (number: string) => regPhone.test(number);
+
+  const getVerifyCode = () => {
+    if (checkPhoneNum(watch("phoneNumber"))) {
+      let phone: string =
+        watch("countryCode").slice(-2) + "-" + watch("phoneNumber").slice(1);
+      fetch("/api/auth", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          phone,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => setVerifyCode(data));
+    }
+  };
+
+  const confirmVerifyCode = (code: string) => {
+    if (verifyCode === "333333") {
+      return alert("맞음");
+    } else {
+      return alert("틀림");
+    }
+  };
+
   return (
     <Container>
       <CreateAccount onSubmit={handleSubmit(onSubmit)}>
@@ -29,51 +64,37 @@ function Info() {
             <Span>코인고스트는 개인 휴대전화 번호를 계정으로 사용합니다.</Span>
           </Header>
           <SelectWrapper>
-            <Select>
-              <Option>대한민국 +82</Option>
-              <Option>미국 +82</Option>
-              <Option>일본 +82</Option>
+            <Select
+              {...register("countryCode")}
+              onChange={(e) => console.log(e.currentTarget.value)}
+            >
+              <Option value="+82">대한민국 +82</Option>
+              <Option value="+82">대한민국 +82</Option>
+              <Option value="+82">대한민국 +82</Option>
             </Select>
           </SelectWrapper>
           <PhoneNumberWrapper>
             <Input //
-              type="number"
+              type="text"
               placeholder="010-1234-5678"
-              {...register("phoneNumberErrorInput", {
-                required: "형식에 맞지 않는 번호입니다.",
-                minLength: {
-                  value: 11,
-                  message: "This input must exceed 10 characters",
-                },
-              })}
+              {...register("phoneNumber", { required: true })}
             />
-            <Button>인증번호 받기</Button>
+            <Button onClick={() => getVerifyCode()}>인증번호 받기</Button>
           </PhoneNumberWrapper>
-          <ErrorMessage
-            errors={errors}
-            name="phoneNumberErrorInput"
-            render={({ messages }) => {
-              console.log("messages", messages);
-              return messages
-                ? Object.entries(messages).map(([type, message]) => (
-                    <p key={type}>{message}</p>
-                  ))
-                : null;
-            }}
-          />
+          {errors.phoneNumber && <p>abcdefghijklmnopqrstuvwxyz</p>}
+
           <ConfirmNumberWrapper>
             <Input //
-              type="number"
+              type="text"
               placeholder="인증번호"
-              {...register("confirmNumberErrorInput", {
+              {...register("verifyCode", {
                 required: "인증번호가 틀렸습니다. 다시 시도해 주세요.",
               })}
             />
-            <Button>인증하기</Button>
+            <Button onClick={() => confirmVerifyCode()}>인증하기</Button>
           </ConfirmNumberWrapper>
         </PhoneNumberConfirmWrapper>
-
-        <ErrorMessage errors={errors} name="confirmNumberErrorInput" />
+        {errors.verifyCode && <p>abcdefghijklmnopqrstuvwxyz</p>}
 
         <PwAndConfirmWrapper>
           <PwWrapper>
@@ -81,40 +102,25 @@ function Info() {
             <InputWrapper>
               <PwInput
                 type="password"
-                {...register("pwErrorInput", {
-                  pattern: {
-                    value:
-                      /^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,16}$/,
-                    message:
-                      "8~16자 영문 대 소문자, 숫자, 특수문자를 사용하세요.",
-                  },
-                  required:
-                    "8~16자 영문 대 소문자, 숫자, 특수문자를 사용하세요.",
-                  minLength: {
-                    value: 8,
-                    message: "8자 미만입니다.",
-                  },
-                  maxLength: {
-                    value: 16,
-                    message: "16자를 초과하셨습니다.",
-                  },
-                })}
+                placeholder="010-1234-5678"
+                {...register("pwInput", { required: true })}
+              />
               />
             </InputWrapper>
           </PwWrapper>
-          <ErrorMessage errors={errors} name="pwErrorInput" />
+          {errors.pwInput && <p>098765432</p>}
           <PwConfirmWrapper>
             <Text>패스워드 재확인</Text>
             <InputWrapper>
               <PwInput
                 type="password"
-                {...register("pwConfirmErrorInput", {
+                {...register("pwConfirm", {
                   required: "패스워드가 일치하지 않습니다.",
                 })}
               />
             </InputWrapper>
           </PwConfirmWrapper>
-          <ErrorMessage errors={errors} name="pwConfirmErrorInput" />
+          {errors.pwConfirm && <p>zyxwvsdf</p>}
         </PwAndConfirmWrapper>
 
         <NickNameAndProfileWrapper>
@@ -123,14 +129,15 @@ function Info() {
             <InputWrapper>
               <Input
                 type="text"
-                {...register("nickNameErrorInput", {
+                {...register("nickName", {
                   required: "이미 사용 중인 닉네임입니다.",
                 })}
               />
               <Button>중복확인</Button>
             </InputWrapper>
+            {errors.nickName && <p>123456789</p>}
           </NickNameWrapper>
-          <ErrorMessage errors={errors} name="nickNameErrorInput" />
+          
           <ProfileWrapper>
             <Text>프로필 사진(선택)</Text>
             <InputWrapper>

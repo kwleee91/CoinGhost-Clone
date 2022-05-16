@@ -60,6 +60,15 @@ button {
   border: none;
   background-color: transparent;
 }
+p {
+  color: #bf1650;
+	margin-bottom: 5px;
+}
+
+p::before {
+  display: inline;
+  content: "⚠ ";
+}
 `;
 
 export default GlobalStyle;
