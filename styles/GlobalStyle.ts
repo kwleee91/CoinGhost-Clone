@@ -62,12 +62,7 @@ button {
 }
 p {
   color: #bf1650;
-	margin-bottom: 5px;
-}
-
-p::before {
-  display: inline;
-  content: "⚠ ";
+	margin: 5px 0;
 }
 `;
 

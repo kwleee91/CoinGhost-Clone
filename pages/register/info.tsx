@@ -1,29 +1,39 @@
 import styled from "styled-components";
 import { useForm } from "react-hook-form";
-import { useState } from "react";
+import React, { useState, ChangeEvent, ReactText } from "react";
 
-interface FormInputs {
+interface IForm {
   countryCode: string;
   phoneNumber: string;
   verifyCode: number;
-  pwInput: number;
+  password: number;
   pwConfirm: number;
   nickName: string;
 }
 
 function Info() {
   const [verifyCode, setVerifyCode] = useState([]);
-  console.log(verifyCode);
+
   const {
     register,
     watch,
     handleSubmit,
     formState: { errors },
-  } = useForm<FormInputs>({
+    setError,
+  } = useForm<IForm>({
     criteriaMode: "all",
   });
 
-  const onSubmit = (data: FormInputs) => console.log("");
+  const onValid = (data: IForm, e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (data.password !== data.pwConfirm) {
+      setError(
+        "pwConfirm",
+        { message: "패스워드가 일치하지 않습니다." },
+        { shouldFocus: true }
+      );
+    }
+  };
 
   const regPhone = /^01([0|1|6|7|8|9])-?([0-9]{3,4})-?([0-9]{4})$/;
 
@@ -31,8 +41,7 @@ function Info() {
 
   const getVerifyCode = () => {
     if (checkPhoneNum(watch("phoneNumber"))) {
-      let phone: string =
-        watch("countryCode").slice(-2) + "-" + watch("phoneNumber").slice(1);
+      let phone: string = watch("phoneNumber");
       fetch("/api/auth", {
         method: "POST",
         headers: {
@@ -46,18 +55,10 @@ function Info() {
         .then((data) => setVerifyCode(data));
     }
   };
-
-  const confirmVerifyCode = (code: string) => {
-    if (verifyCode === "333333") {
-      return alert("맞음");
-    } else {
-      return alert("틀림");
-    }
-  };
-
+  console.log(Object.keys(errors).length);
   return (
     <Container>
-      <CreateAccount onSubmit={handleSubmit(onSubmit)}>
+      <CreateAccount onSubmit={handleSubmit(onValid)}>
         <PhoneNumberConfirmWrapper>
           <Header>
             <Text>계정생성</Text>
@@ -77,52 +78,54 @@ function Info() {
             <Input //
               type="text"
               placeholder="010-1234-5678"
-              {...register("phoneNumber", { required: true })}
+              {...register("phoneNumber", {
+                required: "핸드폰 번호를 입력해주세요.",
+                pattern: {
+                  value: /^01([0|1|6|7|8|9])-?([0-9]{3,4})-?([0-9]{4})$/,
+                  message: "핸드폰 번호를 입력해주세요.",
+                },
+              })}
             />
             <Button onClick={() => getVerifyCode()}>인증번호 받기</Button>
           </PhoneNumberWrapper>
-          {errors.phoneNumber && <p>abcdefghijklmnopqrstuvwxyz</p>}
-
+          <p>{errors?.phoneNumber?.message}</p>
           <ConfirmNumberWrapper>
             <Input //
               type="text"
               placeholder="인증번호"
               {...register("verifyCode", {
-                required: "인증번호가 틀렸습니다. 다시 시도해 주세요.",
+                required: true,
               })}
             />
-            <Button onClick={() => confirmVerifyCode()}>인증하기</Button>
+            <Button>인증하기</Button>
           </ConfirmNumberWrapper>
         </PhoneNumberConfirmWrapper>
-        {errors.verifyCode && <p>abcdefghijklmnopqrstuvwxyz</p>}
-
-        <PwAndConfirmWrapper>
+        <p>{errors?.verifyCode?.message}</p>
+        <Password>
           <PwWrapper>
             <Text>패스워드</Text>
-            <InputWrapper>
-              <PwInput
-                type="password"
-                placeholder="010-1234-5678"
-                {...register("pwInput", { required: true })}
-              />
-              />
-            </InputWrapper>
+            <PasswordInput
+              type="password"
+              {...register("password", {
+                required: "패스워드를 입력해주세요.",
+                pattern: {
+                  value: /^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,16}$/,
+                  message:
+                    "8~16자 영문 대 소문자, 숫자, 특수문자를 사용하세요.",
+                },
+              })}
+            />
           </PwWrapper>
-          {errors.pwInput && <p>098765432</p>}
+          <p>{errors?.password?.message}</p>
           <PwConfirmWrapper>
             <Text>패스워드 재확인</Text>
-            <InputWrapper>
-              <PwInput
-                type="password"
-                {...register("pwConfirm", {
-                  required: "패스워드가 일치하지 않습니다.",
-                })}
-              />
-            </InputWrapper>
+            <PasswordInput
+              type="password"
+              {...register("pwConfirm", { required: true })}
+            />
           </PwConfirmWrapper>
-          {errors.pwConfirm && <p>zyxwvsdf</p>}
-        </PwAndConfirmWrapper>
-
+          <p>{errors?.pwConfirm?.message}</p>
+        </Password>
         <NickNameAndProfileWrapper>
           <NickNameWrapper>
             <Text>닉네임</Text>
@@ -130,23 +133,26 @@ function Info() {
               <Input
                 type="text"
                 {...register("nickName", {
-                  required: "이미 사용 중인 닉네임입니다.",
+                  required: true,
                 })}
               />
               <Button>중복확인</Button>
             </InputWrapper>
-            {errors.nickName && <p>123456789</p>}
+            <p>{errors?.nickName?.message}</p>
           </NickNameWrapper>
-          
           <ProfileWrapper>
             <Text>프로필 사진(선택)</Text>
             <InputWrapper>
-              <ProfileInput type="file" title="as " />
+              <ProfileInput type="file" />
               <Button>사진변경</Button>
             </InputWrapper>
           </ProfileWrapper>
         </NickNameAndProfileWrapper>
-        <CreateButton type="submit" value="가입하기" />
+        <CreateButton
+          className={Object.keys(errors).length === 0 ? "active" : ""}
+          type="submit"
+          value="가입하기"
+        />
       </CreateAccount>
     </Container>
   );
@@ -220,7 +226,7 @@ const ConfirmNumberWrapper = styled.div`
   }
 `;
 
-const PwAndConfirmWrapper = styled.div`
+const Password = styled.div`
   margin-bottom: 15px;
 `;
 const PwWrapper = styled.div``;
@@ -237,7 +243,7 @@ const InputWrapper = styled.div`
     margin: 0;
   }
 `;
-const PwInput = styled.input`
+const PasswordInput = styled.input`
   width: 490px;
   height: 50px;
   border: 1px solid ${(props) => props.theme.colors.lightgray};
@@ -264,9 +270,13 @@ const CreateButton = styled.input`
   margin-top: 55px;
   border: 1px solid ${(props) => props.theme.colors.lightgray};
   text-align: center;
-  color: ${(props) => props.theme.colors.darkgray};
+  color: ${(props) => props.theme.colors.white};
   background-color: ${(props) => props.theme.btnColors.unactive};
   border-radius: 5px;
+  &.active {
+    background-color: ${(props) => props.theme.btnColors.active};
+    cursor: pointer;
+  }
 `;
 
 export default Info;

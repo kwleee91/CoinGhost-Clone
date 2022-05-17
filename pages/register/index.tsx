@@ -78,7 +78,7 @@ function Register() {
                 </Label>
               </CheckBoxWrapper>
               <TextWrapper>
-                <TextArea defaultValue={item.content}></TextArea>
+                <TextArea defaultValue={item.content} />
               </TextWrapper>
             </ChkBoxAndText>
           );

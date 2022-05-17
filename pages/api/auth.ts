@@ -5,7 +5,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
     if (req.method === "POST") {
       const { body } = req;
 
-      if (body.phone === "82-1012341234") {
+      if (body.phone === "010-1234-5678") {
         res.status(200).json({ data: { message: "333333" } });
       } else {
         res

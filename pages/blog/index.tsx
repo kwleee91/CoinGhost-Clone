@@ -1,7 +1,38 @@
 import styled from "styled-components";
 import Image from "next/image";
+import useSWR from "swr";
+import { useState } from "react";
+import useSWRInfinite from "swr/infinite";
+
+interface IData {
+  data: {
+    data: {
+      id: number;
+      defaultThumbnail: {
+        url: string;
+      };
+      title: string;
+      creator: {
+        nickName: string;
+      };
+    };
+  };
+}
+
+const fetcher = (url: RequestInfo) => fetch(url).then((res) => res.json());
 
 function Home() {
+  const [page, setPage] = useState(0);
+  const [list, setList] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const { data, error } = useSWR<IData>(
+    "https://api.dev.coinghost.com/blogs",
+    fetcher
+  );
+  if (error) return "An error has occured";
+  if (!data) return "Loading...";
+
   return (
     <Container>
       <Nav>
@@ -33,42 +64,46 @@ function Home() {
         </ListHeader>
 
         <Article>
-          <ArticleItem>
-            <ImgWrapper>
-              <img src="/img/banner.svg" alt="Banner" />
-            </ImgWrapper>
-            <ArticleInfo>
-              <ArticleTitle>
-                <span>블로고 다양한 활동하자</span>
-              </ArticleTitle>
-              <ArticleDetail>
-                <User>
-                  <span>핫도그</span>
-                  <span>17분 전</span>
-                </User>
-                <LikeAndComment>
-                  <div>
-                    <Image
-                      src="/img/heart.png"
-                      alt="Heart"
-                      width={30}
-                      height={30}
-                    />
-                    <span>0</span>
-                  </div>
-                  <div>
-                    <Image
-                      src="/img/dot.svg"
-                      alt="Heart"
-                      width={30}
-                      height={30}
-                    />
-                    <span>0</span>
-                  </div>
-                </LikeAndComment>
-              </ArticleDetail>
-            </ArticleInfo>
-          </ArticleItem>
+          {data?.data.data.map((item) => {
+            return (
+              <ArticleItem key={item.id}>
+                <ImgWrapper>
+                  <img src={item.defaultThumbnail.url} alt={item.title} />
+                </ImgWrapper>
+                <ArticleInfo>
+                  <ArticleTitle>
+                    <span>{item.title}</span>
+                  </ArticleTitle>
+                  <ArticleDetail>
+                    <User>
+                      <span>{item.creator.nickName}</span>
+                      <span>17분 전</span>
+                    </User>
+                    <LikeAndComment>
+                      <div>
+                        <Image
+                          src="/img/heart.png"
+                          alt="Heart"
+                          width={30}
+                          height={30}
+                        />
+                        <span>0</span>
+                      </div>
+                      <div>
+                        <Image
+                          src="/img/dot.svg"
+                          alt="Heart"
+                          width={30}
+                          height={30}
+                        />
+                        <span>0</span>
+                      </div>
+                    </LikeAndComment>
+                  </ArticleDetail>
+                </ArticleInfo>
+              </ArticleItem>
+            );
+          })}
         </Article>
       </List>
     </Container>
@@ -137,7 +172,9 @@ const Article = styled.ul``;
 
 const ArticleItem = styled.li`
   display: flex;
-  margin-top: 23px;
+  margin-top: 30px;
+  padding-bottom: 23px;
+  border-bottom: 1px solid ${(props) => props.theme.colors.lightgray}; ;
 `;
 
 const ImgWrapper = styled.div`
@@ -146,13 +183,16 @@ const ImgWrapper = styled.div`
   img {
     width: 100%;
     height: 100%;
+    border-radius: 5px;
   }
 `;
 
 const ArticleInfo = styled.div`
+  width: 100%;
   display: flex;
   flex-direction: column;
-  width: 100%;
+  justify-content: space-around;
+  margin-left: 20px;
 `;
 
 const ArticleTitle = styled.div`

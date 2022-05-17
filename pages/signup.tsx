@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 function Signup() {
-  return <Container>Signup</Container>;
+  return <Container></Container>;
 }
 
 const Container = styled.div``;
