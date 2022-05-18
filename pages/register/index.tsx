@@ -129,10 +129,12 @@ const CheckBox = styled.input`
 `;
 
 const Label = styled.label`
+  display: inline-block;
+  width: 100%;
   margin-left: 8px;
   font-size: 14px;
   font-weight: bold;
-  text-align: left;
+  /* text-align: left; */
   & span:last-child {
     margin-left: 8px;
     color: ${(props) => props.theme.colors.blue};

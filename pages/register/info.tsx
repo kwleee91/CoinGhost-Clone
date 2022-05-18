@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import { useForm } from "react-hook-form";
-import React, { useState, ChangeEvent, ReactText } from "react";
+import React, { useEffect, useState } from "react";
+import Image from "next/image";
 
 interface IForm {
   countryCode: string;
@@ -12,7 +13,8 @@ interface IForm {
 }
 
 function Info() {
-  const [verifyCode, setVerifyCode] = useState([]);
+  const [pwVisible, setPwVisible] = useState(false);
+  const [pwConfirmVisible, setPwConfirmVisible] = useState(false);
 
   const {
     register,
@@ -55,7 +57,13 @@ function Info() {
         .then((data) => setVerifyCode(data));
     }
   };
-  console.log(Object.keys(errors).length);
+
+  const handlePwVisible = () => {
+    setPwVisible(!pwVisible);
+  };
+  const handlePwConfirmVisible = () => {
+    setPwConfirmVisible(!pwConfirmVisible);
+  };
   return (
     <Container>
       <CreateAccount onSubmit={handleSubmit(onValid)}>
@@ -91,10 +99,10 @@ function Info() {
           <p>{errors?.phoneNumber?.message}</p>
           <ConfirmNumberWrapper>
             <Input //
-              type="text"
+              type="number"
               placeholder="인증번호"
               {...register("verifyCode", {
-                required: true,
+                required: "인증번호가 틀렸습니다. 다시 시도해 주세요.",
               })}
             />
             <Button>인증하기</Button>
@@ -105,7 +113,7 @@ function Info() {
           <PwWrapper>
             <Text>패스워드</Text>
             <PasswordInput
-              type="password"
+              type={pwVisible === false ? "password" : "text"}
               {...register("password", {
                 required: "패스워드를 입력해주세요.",
                 pattern: {
@@ -115,14 +123,38 @@ function Info() {
                 },
               })}
             />
+            <ImgWrapper onClick={handlePwVisible}>
+              <Image
+                src={
+                  pwVisible === true ? "/img/visible.png" : "/img/invisible.png"
+                }
+                alt="invisible"
+                width={30}
+                height={30}
+              />
+            </ImgWrapper>
           </PwWrapper>
           <p>{errors?.password?.message}</p>
           <PwConfirmWrapper>
             <Text>패스워드 재확인</Text>
             <PasswordInput
-              type="password"
-              {...register("pwConfirm", { required: true })}
+              type={pwConfirmVisible === false ? "password" : "text"}
+              {...register("pwConfirm", {
+                required: "패스워드를 다시 입력해주세요.",
+              })}
             />
+            <ImgWrapper onClick={handlePwConfirmVisible}>
+              <Image
+                src={
+                  pwConfirmVisible === true
+                    ? "/img/visible.png"
+                    : "/img/invisible.png"
+                }
+                alt="visible"
+                width={30}
+                height={30}
+              />
+            </ImgWrapper>
           </PwConfirmWrapper>
           <p>{errors?.pwConfirm?.message}</p>
         </Password>
@@ -133,7 +165,7 @@ function Info() {
               <Input
                 type="text"
                 {...register("nickName", {
-                  required: true,
+                  required: "이미 사용 중인 닉네임입니다.",
                 })}
               />
               <Button>중복확인</Button>
@@ -229,11 +261,13 @@ const ConfirmNumberWrapper = styled.div`
 const Password = styled.div`
   margin-bottom: 15px;
 `;
-const PwWrapper = styled.div``;
+const PwWrapper = styled.div`
+  position: relative;
+`;
 const InputWrapper = styled.div`
   display: flex;
   align-items: center;
-  margin-top: 15px;
+  margin: 15px 0;
   & ::-webkit-file-upload-button {
     display: none;
   }
@@ -248,8 +282,17 @@ const PasswordInput = styled.input`
   height: 50px;
   border: 1px solid ${(props) => props.theme.colors.lightgray};
   border-radius: 5px;
+  margin-top: 15px;
+  padding-left: 10px;
+`;
+
+const ImgWrapper = styled.div`
+  position: absolute;
+  top: 40px;
+  right: 15px;
 `;
 const PwConfirmWrapper = styled.div`
+  position: relative;
   margin-top: 15px;
 `;
 

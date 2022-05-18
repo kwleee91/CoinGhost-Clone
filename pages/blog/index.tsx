@@ -1,13 +1,15 @@
 import styled from "styled-components";
 import Image from "next/image";
 import useSWR from "swr";
-import { useState } from "react";
+import Link from "next/link";
+import { useState, useEffect } from "react";
 import useSWRInfinite from "swr/infinite";
 
 interface IData {
   data: {
     data: {
       id: number;
+      createdAt: string;
       defaultThumbnail: {
         url: string;
       };
@@ -21,11 +23,7 @@ interface IData {
 
 const fetcher = (url: RequestInfo) => fetch(url).then((res) => res.json());
 
-function Home() {
-  const [page, setPage] = useState(0);
-  const [list, setList] = useState([]);
-  const [loading, setLoading] = useState(false);
-
+function Home({ posts }: IData) {
   const { data, error } = useSWR<IData>(
     "https://api.dev.coinghost.com/blogs",
     fetcher
@@ -66,48 +64,62 @@ function Home() {
         <Article>
           {data?.data.data.map((item) => {
             return (
-              <ArticleItem key={item.id}>
-                <ImgWrapper>
-                  <img src={item.defaultThumbnail.url} alt={item.title} />
-                </ImgWrapper>
-                <ArticleInfo>
-                  <ArticleTitle>
-                    <span>{item.title}</span>
-                  </ArticleTitle>
-                  <ArticleDetail>
-                    <User>
-                      <span>{item.creator.nickName}</span>
-                      <span>17분 전</span>
-                    </User>
-                    <LikeAndComment>
-                      <div>
-                        <Image
-                          src="/img/heart.png"
-                          alt="Heart"
-                          width={30}
-                          height={30}
-                        />
-                        <span>0</span>
-                      </div>
-                      <div>
-                        <Image
-                          src="/img/dot.svg"
-                          alt="Heart"
-                          width={30}
-                          height={30}
-                        />
-                        <span>0</span>
-                      </div>
-                    </LikeAndComment>
-                  </ArticleDetail>
-                </ArticleInfo>
-              </ArticleItem>
+              <Link key={item.id} href={`/blog/${item.id}`}>
+                <a>
+                  <ArticleItem>
+                    <ImgWrapper>
+                      <img src={item.defaultThumbnail.url} alt={item.title} />
+                    </ImgWrapper>
+                    <ArticleInfo>
+                      <ArticleTitle>
+                        <span>{item.title}</span>
+                      </ArticleTitle>
+                      <ArticleDetail>
+                        <User>
+                          <span>{item.creator.nickName}</span>
+                          <span>17분 전</span>
+                        </User>
+                        <LikeAndComment>
+                          <div>
+                            <Image
+                              src="/img/heart.png"
+                              alt="Heart"
+                              width={30}
+                              height={30}
+                            />
+                            <span>0</span>
+                          </div>
+                          <div>
+                            <Image
+                              src="/img/dot.svg"
+                              alt="Heart"
+                              width={30}
+                              height={30}
+                            />
+                            <span>0</span>
+                          </div>
+                        </LikeAndComment>
+                      </ArticleDetail>
+                    </ArticleInfo>
+                  </ArticleItem>
+                </a>
+              </Link>
             );
           })}
         </Article>
       </List>
     </Container>
   );
+}
+
+export async function getStaticProps() {
+  const res = await fetch("https://api.dev.coinghost.com/blogs");
+  const posts = await res.json();
+  return {
+    props: {
+      posts,
+    },
+  };
 }
 
 const Container = styled.div`
