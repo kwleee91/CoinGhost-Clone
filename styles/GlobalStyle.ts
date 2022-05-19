@@ -61,8 +61,12 @@ button {
   background-color: transparent;
 }
 p {
+	width: 55%;
   color: #bf1650;
 	margin: 5px 0;
+	&.success{
+		color:blue;
+	}
 }
 `;
 

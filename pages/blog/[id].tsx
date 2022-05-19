@@ -8,6 +8,8 @@ import Link from "next/link";
 // Components
 import DetailHeader from "./components/DetailHeader";
 import DetailUserInfo from "./components/DetailUserInfo";
+import { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from "next";
+import { useRouter } from "next/router";
 
 interface IData {
   data: {
@@ -21,31 +23,46 @@ interface IData {
       creator: {
         nickName: string;
       };
+      contents: string;
     };
   };
 }
 
-const Home = ({ post }: IData) => {
+const Home = ({
+  post,
+  blogs,
+}: InferGetStaticPropsType<typeof getStaticProps>) => {
   const item = post?.data.data;
+  const parse = require("html-react-parser");
+  const blogsData = blogs?.data?.data;
+  const router = useRouter();
+
+  const currentIndex = blogsData?.findIndex(
+    (i: { id: number }) => i.id === Number(router.query.id)
+  );
+
+  const next =
+    blogsData &&
+    blogsData.find((el: object, i: number) => i === currentIndex + 1);
+
+  const prev =
+    blogsData &&
+    blogsData.find((el: object, i: number) => i === currentIndex - 1);
+
+  // console.log("blogsData", blogsData);
+  console.log("currentIndex", currentIndex);
+  console.log("next", next);
+  console.log("prev", prev);
+  // console.log(blogsData);
 
   return (
     <Container>
       <DetailHeader />
+      <Text>{item.title}</Text>
 
       <Section>
         <DetailUserInfo data={post.data.data} />
-        <Article>
-          <Text>{item.title}</Text>
-          <ImgWrapper>
-            <Image
-              src="/img/detail-banner.png"
-              alt="detail-banner"
-              width={666}
-              height={357}
-            />
-          </ImgWrapper>
-          <Text>{item.title}</Text>
-        </Article>
+        <Article>{parse(item.contents)}</Article>
 
         <ButtonWrapper>
           <Link href="/blog">
@@ -83,7 +100,7 @@ const Home = ({ post }: IData) => {
           </CommentHeader>
           <CommentForm>
             <span>서제리</span>
-            <span>abcdefghijklmnopqrstuvwxyz</span>
+            <textarea>abcdefghijklmnopqrstuvwxyz</textarea>
             <button>등록</button>
           </CommentForm>
           <CommentRecord>
@@ -94,33 +111,42 @@ const Home = ({ post }: IData) => {
             </div>
           </CommentRecord>
           <ArticleRecord>
-            <PrevArticle>
-              <div>
-                <Image
-                  src="/img/top-arrow.svg"
-                  alt="top-arrow"
-                  width={20}
-                  height={15}
-                />
-                <span>이전글</span>
-                <span>이전글로 이동해주세요.</span>
-              </div>
-              <span>2021.10.12</span>
-            </PrevArticle>
+            <Link href={`/blog/${prev?.id}`}>
+              <a>
+                <PrevArticle>
+                  <div>
+                    <Image
+                      src="/img/top-arrow.svg"
+                      alt="top-arrow"
+                      width={20}
+                      height={15}
+                    />
+                    <span>이전글</span>
+                    <span>{prev?.title}</span>
+                  </div>
+                  <span>{prev?.updatedAt}</span>
+                </PrevArticle>
+              </a>
+            </Link>
+
             <hr />
-            <PrevArticle>
-              <div>
-                <Image
-                  src="/img/bottom-arrow.svg"
-                  alt="bottom-arrow"
-                  width={20}
-                  height={15}
-                />
-                <span>이전글</span>
-                <span>이전글로 이동해주세요.</span>
-              </div>
-              <span>2021.10.12</span>
-            </PrevArticle>
+            <Link href={`/blog/${next?.id}`}>
+              <a>
+                <PrevArticle>
+                  <div>
+                    <Image
+                      src="/img/bottom-arrow.svg"
+                      alt="bottom-arrow"
+                      width={20}
+                      height={15}
+                    />
+                    <span>다음글</span>
+                    <span>{next?.title}</span>
+                  </div>
+                  <span>{next?.updatedAt}</span>
+                </PrevArticle>
+              </a>
+            </Link>
           </ArticleRecord>
         </Comment>
       </Section>
@@ -146,9 +172,13 @@ export const getStaticProps: GetStaticProps = async (context) => {
     `https://api.dev.coinghost.com/blogs/${context.params.id}`
   );
   const post = await res.json();
+  const response = await fetch("https://api.dev.coinghost.com/blogs");
+  const blogs = await response.json();
+
   return {
     props: {
       post,
+      blogs,
     },
   };
 };
@@ -164,7 +194,14 @@ const Section = styled.div`
 
 const Article = styled.div`
   margin: 26px 0;
+  p {
+    color: inherit;
+  }
+  img {
+    width: 100%;
+  }
 `;
+
 const Text = styled.span`
   font-size: 26px;
 `;

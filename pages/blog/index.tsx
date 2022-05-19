@@ -23,7 +23,7 @@ interface IData {
 
 const fetcher = (url: RequestInfo) => fetch(url).then((res) => res.json());
 
-function Home({ posts }: IData) {
+function Home() {
   const { data, error } = useSWR<IData>(
     "https://api.dev.coinghost.com/blogs",
     fetcher
@@ -110,16 +110,6 @@ function Home({ posts }: IData) {
       </List>
     </Container>
   );
-}
-
-export async function getStaticProps() {
-  const res = await fetch("https://api.dev.coinghost.com/blogs");
-  const posts = await res.json();
-  return {
-    props: {
-      posts,
-    },
-  };
 }
 
 const Container = styled.div`

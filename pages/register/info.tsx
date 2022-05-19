@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import { useForm } from "react-hook-form";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 
 interface IForm {
@@ -13,8 +13,11 @@ interface IForm {
 }
 
 function Info() {
+  const [isDisable, setIsDisable] = useState(true);
   const [pwVisible, setPwVisible] = useState(false);
   const [pwConfirmVisible, setPwConfirmVisible] = useState(false);
+  const [verifyCode, setVerifyCode] = useState();
+  const [authentication, setAuthentication] = useState();
 
   const {
     register,
@@ -22,12 +25,12 @@ function Info() {
     handleSubmit,
     formState: { errors },
     setError,
+    trigger,
   } = useForm<IForm>({
     criteriaMode: "all",
   });
 
-  const onValid = (data: IForm, e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const onValid = (data: IForm) => {
     if (data.password !== data.pwConfirm) {
       setError(
         "pwConfirm",
@@ -41,7 +44,7 @@ function Info() {
 
   const checkPhoneNum = (number: string) => regPhone.test(number);
 
-  const getVerifyCode = () => {
+  const getVerifyCode = async () => {
     if (checkPhoneNum(watch("phoneNumber"))) {
       let phone: string = watch("phoneNumber");
       fetch("/api/auth", {
@@ -53,9 +56,60 @@ function Info() {
           phone,
         }),
       })
-        .then((res) => res.json())
-        .then((data) => setVerifyCode(data));
+        .then((res) => {
+          if (!res.ok) throw res;
+          return res.json();
+        })
+        .then((data) => {
+          setIsDisable(true);
+          alert("인증번호를 보냈습니다.");
+          setVerifyCode(data.data.message);
+          trigger("phoneNumber");
+        })
+        .catch(async (err) => {
+          const error = await err.json();
+          alert(error?.data?.message);
+          setError("phoneNumber", {
+            type: "wrong number",
+            message: "잘못된 번호입니다.",
+          });
+        });
     }
+    return;
+  };
+
+  const getAuthentication = async () => {
+    if (verifyCode === "333333") {
+      if (watch("verifyCode")) {
+        let auth: number = watch("verifyCode");
+        fetch("/api/register", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            auth,
+          }),
+        })
+          .then((res) => {
+            if (!res.ok) throw new Error("잘못된 인증번호입니다.");
+            return res.json();
+          })
+          .then((data) => {
+            alert(`인증에 성공했습니다.`);
+            setAuthentication(data.data.message);
+            trigger("verifyCode");
+          })
+          .catch((err) => {
+            alert(err.message);
+            setError("verifyCode", {
+              type: "wrong number",
+              message: "잘못된 인증번호입니다.",
+            });
+          });
+      }
+    }
+    return;
   };
 
   const handlePwVisible = () => {
@@ -64,6 +118,7 @@ function Info() {
   const handlePwConfirmVisible = () => {
     setPwConfirmVisible(!pwConfirmVisible);
   };
+
   return (
     <Container>
       <CreateAccount onSubmit={handleSubmit(onValid)}>
@@ -105,10 +160,16 @@ function Info() {
                 required: "인증번호가 틀렸습니다. 다시 시도해 주세요.",
               })}
             />
-            <Button>인증하기</Button>
+            <Button onClick={() => getAuthentication()}>인증하기</Button>
           </ConfirmNumberWrapper>
         </PhoneNumberConfirmWrapper>
         <p>{errors?.verifyCode?.message}</p>
+        <p className="success">
+          {verifyCode === "333333"
+            ? `인증번호를 발송했습니다.
+              이미 가입된 번호이거나, 가상전화번호는 인증번호를 받을 수 없습니다.`
+            : ""}
+        </p>
         <Password>
           <PwWrapper>
             <Text>패스워드</Text>
@@ -168,7 +229,9 @@ function Info() {
                   required: "이미 사용 중인 닉네임입니다.",
                 })}
               />
-              <Button>중복확인</Button>
+              <Button disabled={errors.nickName !== undefined ? true : false}>
+                중복확인
+              </Button>
             </InputWrapper>
             <p>{errors?.nickName?.message}</p>
           </NickNameWrapper>
@@ -240,14 +303,19 @@ const Input = styled.input`
   border-radius: 5px;
   padding: 0 10px;
 `;
-const Button = styled.button`
+const Button = styled.button.attrs({ type: "button" })`
   width: 130px;
   height: 50px;
   border: 1px solid ${(props) => props.theme.colors.lightgray};
   text-align: center;
   color: ${(props) => props.theme.colors.white};
-  background-color: ${(props) => props.theme.btnColors.unactive};
+  background-color: ${(props) => props.theme.btnColors.active};
   border-radius: 5px;
+  cursor: pointer;
+  &:disabled {
+    background-color: ${(props) => props.theme.btnColors.unactive};
+    cursor: inherit;
+  }
 `;
 const ConfirmNumberWrapper = styled.div`
   margin-bottom: 15px;
