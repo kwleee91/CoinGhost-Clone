@@ -204,6 +204,7 @@ const Article = styled.div`
 
 const Text = styled.span`
   font-size: 26px;
+  padding: 0 42px;
 `;
 
 const ImgWrapper = styled.div`

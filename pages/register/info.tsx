@@ -2,6 +2,7 @@ import styled from "styled-components";
 import { useForm } from "react-hook-form";
 import React, { useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/router";
 
 interface IForm {
   countryCode: string;
@@ -18,6 +19,9 @@ function Info() {
   const [pwConfirmVisible, setPwConfirmVisible] = useState(false);
   const [verifyCode, setVerifyCode] = useState();
   const [authentication, setAuthentication] = useState();
+
+  const router = useRouter();
+  console.log(router);
 
   const {
     register,
@@ -38,6 +42,7 @@ function Info() {
         { shouldFocus: true }
       );
     }
+    router.push("/");
   };
 
   const regPhone = /^01([0|1|6|7|8|9])-?([0-9]{3,4})-?([0-9]{4})$/;
@@ -269,12 +274,12 @@ const Text = styled.span`
   font-size: 14px;
   font-weight: bold;
   text-align: left;
-  color: ${(props) => props.theme.colors.black};
+  color: ${({ theme }) => theme.colors.black};
 `;
 const Span = styled.span`
   font-size: 10px;
   text-align: right;
-  color: ${(props) => props.theme.colors.darkgray};
+  color: ${({ theme }) => theme.colors.darkgray};
 `;
 const SelectWrapper = styled.div`
   margin-bottom: 15px;
@@ -282,7 +287,7 @@ const SelectWrapper = styled.div`
 const Select = styled.select`
   width: 490px;
   height: 50px;
-  border: 1px solid ${(props) => props.theme.colors.lightgray};
+  border: 1px solid ${({ theme }) => theme.colors.lightgray};
   border-radius: 5px;
   padding: 0 10px;
 `;
@@ -298,7 +303,7 @@ const PhoneNumberWrapper = styled.div`
 const Input = styled.input`
   width: 350px;
   height: 50px;
-  border: 1px solid ${(props) => props.theme.colors.lightgray};
+  border: 1px solid ${({ theme }) => theme.colors.lightgray};
   margin-right: 10px;
   border-radius: 5px;
   padding: 0 10px;
@@ -306,14 +311,14 @@ const Input = styled.input`
 const Button = styled.button.attrs({ type: "button" })`
   width: 130px;
   height: 50px;
-  border: 1px solid ${(props) => props.theme.colors.lightgray};
+  border: 1px solid ${({ theme }) => theme.colors.lightgray};
   text-align: center;
-  color: ${(props) => props.theme.colors.white};
-  background-color: ${(props) => props.theme.btnColors.active};
+  color: ${({ theme }) => theme.colors.white};
+  background-color: ${({ theme }) => theme.colors.blue};
   border-radius: 5px;
   cursor: pointer;
   &:disabled {
-    background-color: ${(props) => props.theme.btnColors.unactive};
+    background-color: ${({ theme }) => theme.colors.sky};
     cursor: inherit;
   }
 `;
@@ -348,7 +353,7 @@ const InputWrapper = styled.div`
 const PasswordInput = styled.input`
   width: 490px;
   height: 50px;
-  border: 1px solid ${(props) => props.theme.colors.lightgray};
+  border: 1px solid ${({ theme }) => theme.colors.lightgray};
   border-radius: 5px;
   margin-top: 15px;
   padding-left: 10px;
@@ -379,13 +384,13 @@ const CreateButton = styled.input`
   width: 490px;
   height: 50px;
   margin-top: 55px;
-  border: 1px solid ${(props) => props.theme.colors.lightgray};
+  border: 1px solid ${({ theme }) => theme.colors.lightgray};
   text-align: center;
   color: ${(props) => props.theme.colors.white};
-  background-color: ${(props) => props.theme.btnColors.unactive};
+  background-color: ${({ theme }) => theme.colors.sky};
   border-radius: 5px;
   &.active {
-    background-color: ${(props) => props.theme.btnColors.active};
+    background-color: ${({ theme }) => theme.colors.blue};
     cursor: pointer;
   }
 `;

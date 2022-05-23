@@ -1,18 +1,17 @@
 import styled from "styled-components";
-import Link from "next/link";
+import Data from "../../public/data/sample.json";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/router";
-import { useState, useEffect } from "react";
-import Data from "../../public/data/sample.json";
+import Link from "next/link";
 
 function Register() {
   const { register, watch, setValue } = useForm();
   const [isAllChecked, setIsAllChecked] = useState(false);
-
   const router = useRouter();
 
-  const allSelect = () => {
-    if (watch("allSelect")) {
+  const allAgree = () => {
+    if (watch("allAgree")) {
       for (let i = 0; i < 5; i++) {
         setValue(`select${i}`, true);
       }
@@ -27,15 +26,10 @@ function Register() {
     if (watch("select1") && watch("select2") && watch("select3")) {
       setIsAllChecked(true);
     } else {
-      setValue("allSelect", false);
+      setValue("allAgree", false);
       setIsAllChecked(false);
     }
-  }, [
-    watch("select1"),
-    watch("select2"),
-    watch("select3"),
-    watch("allSelect"),
-  ]);
+  }, [watch("select1"), watch("select2"), watch("select3"), watch("allAgree")]);
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -45,11 +39,11 @@ function Register() {
   return (
     <Container>
       <Form onSubmit={onSubmit}>
-        <CheckBoxWrapper className="first" onChange={() => allSelect()}>
+        <CheckBoxWrapper className="first" onChange={() => allAgree()}>
           <CheckBox
             id="allAgree"
             type="checkbox"
-            {...register("allSelect")}
+            {...register("allAgree")}
             checked={isAllChecked}
           />
           <Label htmlFor="allAgree">
@@ -60,10 +54,9 @@ function Register() {
             <span></span>
           </Label>
         </CheckBoxWrapper>
-
         {Data.map((item) => {
           return (
-            <ChkBoxAndText key={item.id}>
+            <TermsCondition key={item.id}>
               <CheckBoxWrapper>
                 <CheckBox
                   id={`${item.id}`}
@@ -80,10 +73,9 @@ function Register() {
               <TextWrapper>
                 <TextArea defaultValue={item.content} />
               </TextWrapper>
-            </ChkBoxAndText>
+            </TermsCondition>
           );
         })}
-
         <BtnWrapper>
           <Link href="/">
             <a>
@@ -106,11 +98,11 @@ const Form = styled.form`
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   margin: 30px auto;
 `;
 
-const ChkBoxAndText = styled.div``;
+const TermsCondition = styled.div``;
 
 const CheckBoxWrapper = styled.div`
   width: 100%;
@@ -119,7 +111,7 @@ const CheckBoxWrapper = styled.div`
   margin-bottom: 20px;
   &.first {
     padding-bottom: 40px;
-    border-bottom: 2px solid ${(props) => props.theme.colors.lightgray};
+    border-bottom: 2px solid ${({ theme }) => theme.colors.lightgray};
   }
 `;
 
@@ -134,10 +126,9 @@ const Label = styled.label`
   margin-left: 8px;
   font-size: 14px;
   font-weight: bold;
-  /* text-align: left; */
   & span:last-child {
     margin-left: 8px;
-    color: ${(props) => props.theme.colors.blue};
+    color: ${({ theme }) => theme.colors.blue};
   }
 `;
 
@@ -150,7 +141,7 @@ const TextArea = styled.textarea.attrs({
 })`
   width: 100%;
   padding: 10px;
-  border: 1px solid ${(props) => props.theme.colors.lightgray};
+  border: 1px solid ${({ theme }) => theme.colors.lightgray};
   text-align: left;
   overflow-y: auto;
 `;
@@ -161,22 +152,21 @@ const BtnWrapper = styled.div`
   justify-content: space-between;
   margin-top: 50px;
 `;
-const Btn = styled.button`
-  border: 1px solid ${(props) => props.theme.colors.lightgray};
+const Btn = styled.button.attrs({
+  type: "submit",
+})`
   padding: 20px 105px;
+  border: 1px solid ${({ theme }) => theme.colors.lightgray};
   border-radius: 15px;
   font-weight: 600;
   cursor: pointer;
 `;
 
-const NextBtn = styled(Btn).attrs({
-  type: "submit",
-})`
+const NextBtn = styled(Btn)`
   color: ${(props) => props.theme.colors.white};
-  background-color: ${(props) => props.theme.btnColors.active};
-
+  background-color: ${({ theme }) => theme.colors.blue};
   &:disabled {
-    background-color: ${(props) => props.theme.btnColors.unactive};
+    background-color: ${({ theme }) => theme.colors.sky};
     cursor: inherit;
   }
 `;
