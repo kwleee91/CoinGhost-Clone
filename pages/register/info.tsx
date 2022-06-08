@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import Header from "../../components/Header";
 import { useForm } from "react-hook-form";
 import React, { useState } from "react";
 import Image from "next/image";
@@ -14,20 +15,21 @@ interface IForm {
 }
 
 function Info() {
-  const [isDisable, setIsDisable] = useState(true);
+  const [isDisabled, setIsDisabled] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [pwVisible, setPwVisible] = useState(false);
   const [pwConfirmVisible, setPwConfirmVisible] = useState(false);
   const [verifyCode, setVerifyCode] = useState();
   const [authentication, setAuthentication] = useState();
+  const [optionValue, setOptionValue] = useState(null);
 
   const router = useRouter();
-  console.log(router);
 
   const {
     register,
     watch,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isValid },
     setError,
     trigger,
   } = useForm<IForm>({
@@ -39,6 +41,18 @@ function Info() {
       setError(
         "pwConfirm",
         { message: "패스워드가 일치하지 않습니다." },
+        { shouldFocus: true }
+      );
+    } else if (!isDisabled) {
+      setError(
+        "phoneNumber",
+        { message: "핸드폰번호를 입력해주세요." },
+        { shouldFocus: true }
+      );
+    } else if (!isAuthenticated) {
+      setError(
+        "verifyCode",
+        { message: "핸드폰번호를 인증해주세요." },
         { shouldFocus: true }
       );
     }
@@ -66,7 +80,7 @@ function Info() {
           return res.json();
         })
         .then((data) => {
-          setIsDisable(true);
+          setIsDisabled(true);
           alert("인증번호를 보냈습니다.");
           setVerifyCode(data.data.message);
           trigger("phoneNumber");
@@ -102,6 +116,7 @@ function Info() {
           })
           .then((data) => {
             alert(`인증에 성공했습니다.`);
+            setIsAuthenticated(!isAuthenticated);
             setAuthentication(data.data.message);
             trigger("verifyCode");
           })
@@ -120,30 +135,33 @@ function Info() {
   const handlePwVisible = () => {
     setPwVisible(!pwVisible);
   };
+
   const handlePwConfirmVisible = () => {
     setPwConfirmVisible(!pwConfirmVisible);
   };
 
   return (
     <Container>
+      <Header />
       <CreateAccount onSubmit={handleSubmit(onValid)}>
         <PhoneNumberConfirmWrapper>
-          <Header>
+          <AccountHeader>
             <Text>계정생성</Text>
             <Span>코인고스트는 개인 휴대전화 번호를 계정으로 사용합니다.</Span>
-          </Header>
+          </AccountHeader>
           <SelectWrapper>
-            <Select
+            <Select //
               {...register("countryCode")}
               onChange={(e) => console.log(e.currentTarget.value)}
             >
               <Option value="+82">대한민국 +82</Option>
-              <Option value="+82">대한민국 +82</Option>
-              <Option value="+82">대한민국 +82</Option>
+              <Option value="+852">홍콩 +852</Option>
+              <Option value="+65">싱가포르 +65</Option>
             </Select>
           </SelectWrapper>
           <PhoneNumberWrapper>
             <Input //
+              // pattern="[0-9]{2,3}-[0-9]{3,4}-[0-9]{4}"
               type="text"
               placeholder="010-1234-5678"
               {...register("phoneNumber", {
@@ -154,7 +172,10 @@ function Info() {
                 },
               })}
             />
-            <Button onClick={() => getVerifyCode()}>인증번호 받기</Button>
+
+            <Button onClick={() => getVerifyCode()} disabled={isDisabled}>
+              인증번호 받기
+            </Button>
           </PhoneNumberWrapper>
           <p>{errors?.phoneNumber?.message}</p>
           <ConfirmNumberWrapper>
@@ -163,9 +184,15 @@ function Info() {
               placeholder="인증번호"
               {...register("verifyCode", {
                 required: "인증번호가 틀렸습니다. 다시 시도해 주세요.",
+                validate: (value) => value === true,
               })}
             />
-            <Button onClick={() => getAuthentication()}>인증하기</Button>
+            <Button
+              onClick={() => getAuthentication()}
+              disabled={isAuthenticated}
+            >
+              인증하기
+            </Button>
           </ConfirmNumberWrapper>
         </PhoneNumberConfirmWrapper>
         <p>{errors?.verifyCode?.message}</p>
@@ -207,8 +234,10 @@ function Info() {
               type={pwConfirmVisible === false ? "password" : "text"}
               {...register("pwConfirm", {
                 required: "패스워드를 다시 입력해주세요.",
+                validate: (value) => value === watch("password"),
               })}
             />
+            {errors.pwConfirm && <p>일치하지않는다.</p>}
             <ImgWrapper onClick={handlePwConfirmVisible}>
               <Image
                 src={
@@ -222,7 +251,7 @@ function Info() {
               />
             </ImgWrapper>
           </PwConfirmWrapper>
-          <p>{errors?.pwConfirm?.message}</p>
+          {/* <p>{errors?.pwConfirm?.message}</p> */}
         </Password>
         <NickNameAndProfileWrapper>
           <NickNameWrapper>
@@ -264,10 +293,11 @@ const CreateAccount = styled.form`
   margin: 30px auto;
 `;
 const PhoneNumberConfirmWrapper = styled.div``;
-const Header = styled.div`
+const AccountHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+
   margin-bottom: 15px;
 `;
 const Text = styled.span`

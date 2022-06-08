@@ -1,15 +1,12 @@
 import styled from "styled-components";
-import { useState } from "react";
 import Image from "next/image";
-import Axios from "axios";
-import parse from "html-react-parser";
 import Link from "next/link";
+import { useRouter } from "next/router";
+import { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from "next";
 
 // Components
 import DetailHeader from "./components/DetailHeader";
 import DetailUserInfo from "./components/DetailUserInfo";
-import { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from "next";
-import { useRouter } from "next/router";
 
 interface IData {
   data: {
@@ -48,12 +45,6 @@ const Home = ({
   const prev =
     blogsData &&
     blogsData.find((el: object, i: number) => i === currentIndex - 1);
-
-  // console.log("blogsData", blogsData);
-  console.log("currentIndex", currentIndex);
-  console.log("next", next);
-  console.log("prev", prev);
-  // console.log(blogsData);
 
   return (
     <Container>

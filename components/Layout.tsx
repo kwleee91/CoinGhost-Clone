@@ -10,7 +10,6 @@ interface Props {
 export default function Layout(props: Props) {
   return (
     <>
-      <Header />
       <Seo />
       <div>{props.children}</div>
     </>

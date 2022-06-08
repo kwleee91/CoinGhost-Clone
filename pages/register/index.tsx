@@ -1,12 +1,21 @@
 import styled from "styled-components";
 import Data from "../../public/data/sample.json";
+import Header from "../../components/Header";
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/router";
 import Link from "next/link";
 
+type Inputs = {
+  allAgree: string;
+  select1: string;
+  select2: string;
+  select3: string;
+  select4: string;
+};
+
 function Register() {
-  const { register, watch, setValue } = useForm();
+  const { register, watch, setValue } = useForm<Inputs>();
   const [isAllChecked, setIsAllChecked] = useState(false);
   const router = useRouter();
 
@@ -38,6 +47,7 @@ function Register() {
 
   return (
     <Container>
+      <Header />
       <Form onSubmit={onSubmit}>
         <CheckBoxWrapper className="first" onChange={() => allAgree()}>
           <CheckBox
