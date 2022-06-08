@@ -90,9 +90,11 @@ const Home = ({
             </LikeAndComment>
           </CommentHeader>
           <CommentForm>
-            <span>서제리</span>
-            <textarea>abcdefghijklmnopqrstuvwxyz</textarea>
-            <button>등록</button>
+            <span>댓글왕</span>
+            <textarea></textarea>
+            <div>
+              <button>등록</button>
+            </div>
           </CommentForm>
           <CommentRecord>
             <Image src="/img/pen.png" alt="Heart" width={88} height={88} />
@@ -198,10 +200,6 @@ const Text = styled.span`
   padding: 0 42px;
 `;
 
-const ImgWrapper = styled.div`
-  margin: 25px 0;
-`;
-
 const ButtonWrapper = styled.div`
   display: flex;
   justify-content: space-between;
@@ -253,16 +251,27 @@ const LikeAndComment = styled.div`
 const CommentForm = styled.form`
   display: flex;
   flex-direction: column;
-  align-items: center;
   padding: 21px;
   border: 1px solid black;
   span {
     width: 100%;
     text-align: left;
   }
-  button {
+  textarea {
     width: 100%;
-    text-align: right;
+    height: 100%;
+    border: none;
+    text-align: left;
+  }
+  div {
+    display: flex;
+    justify-content: flex-end;
+    button {
+      padding: 15px 20px;
+      border-radius: 15px;
+      color: ${(props) => props.theme.colors.white};
+      background-color: ${(props) => props.theme.colors.blue};
+    }
   }
 `;
 
